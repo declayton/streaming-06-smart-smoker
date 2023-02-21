@@ -1,20 +1,44 @@
 """
     This program listens for work messages contiously.
-    
+    It also alerts user if foodA temperature changes by less than 1 degree or more in 10 minutes.
 
+    
     Author: Deanna Clayton
-    Date: Februrary 13, 2023
+    Date: Februrary 20, 2023
 
 """
 
 import pika
 import sys
 import csv
+from collections import deque
+
+# create deque
+# limit to 5 items (the 5 most recent readings)
+foodA_deque = deque(maxlen=20)
 
 # open a file to write some data
 # create a csv writer for our comma delimited data
-output_file = open("FoodA.csv", "w")
+output_file = open("FoodA.csv", "w+")
 writer = csv.writer(output_file, delimiter = ",")
+
+# define an alert function to tell us when the foodA temperature decreases less than 1 degree in 10 min
+def smoker_alert(d, message):
+    d.append(message)
+    if len(d) == 20:
+        number = d[0] - d[-1]
+        if abs(number) < 1:
+            print("Food Stall!")
+
+# define a float number function to see if a string can be converted to a float
+def float_num (element):
+    if element is None: 
+        return element
+    try:
+        float(element)
+        return float(element)
+    except ValueError:
+        return element
 
 # define a callback function to be called when a message is received
 def foodA_callback(ch, method, properties, body):
@@ -22,13 +46,18 @@ def foodA_callback(ch, method, properties, body):
     message = body.decode()
     message2 = str(message)[1:-1]
     message3 = message2.split(',')
-    
-    # message2 = message.lower()
-    # decode the binary message body to a string
+    message4 = float_num(message3[1])
+
+    # tell user message has been received
     print(f" [x] Received {message}")
+    
+    # call alert function
+    if isinstance(message4, float):
+        smoker_alert(foodA_deque, message4)
+
     # write the strings to the output file
     writer.writerow(message3)
-    # writer.writerow([message, message2])
+    
     # when done with task, tell the user
     print(" [x] Done.")
     # acknowledge the message was received and processed 

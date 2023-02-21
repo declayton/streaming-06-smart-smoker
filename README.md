@@ -1,7 +1,7 @@
 # streaming-06-smart-smoker
 
 Name: Deanna Clayton
-Date: 2/14/23
+Date: 2/20/23
 
 ## Smart Smoker
 # Using a Barbeque Smoker
@@ -53,5 +53,6 @@ See http://localhost:15672/Links to an external site.
 
 ## Screenshot
 
-Screenshot of terminals
-![Screenshot](Screenshot_producer.png)
+Screenshot of terminals with their alerts
+![Screenshot](Screenshot1.png)
+

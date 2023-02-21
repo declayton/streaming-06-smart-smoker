@@ -3,7 +3,7 @@
 
 
     Author: Deanna Clayton
-    Date: February 13, 2023
+    Date: February 20, 2023
 
 """
 
@@ -17,6 +17,14 @@ input_file = open("smoker-temps.csv", "r")
 
 # create a csv reader for our comma delimited data
 reader = csv.reader(input_file, delimiter=",")
+
+def delete_queue(host: str, queue_name: str):
+    """
+    Delete queues each time program is run
+    """
+    conn = pika.BlockingConnection(pika.ConnectionParameters(host))
+    ch = conn.channel()
+    ch.queue_delete(queue=queue_name)
 
 def send_message(host: str, queue_name: str, message: str):
     """
@@ -58,6 +66,14 @@ def send_message(host: str, queue_name: str, message: str):
 # If this is the program being run, then execute the code below
 if __name__ == "__main__":  
 
+    # Delete the queues to clear out any data previously sent
+    delete_queue("localhost", "temp1")
+    delete_queue("localhost", "temp2")
+    delete_queue("localhost", "temp3")
+
+    # Skip the header row
+    # next(reader)
+
     for row in reader:
         # read a row from the file
         Time, Smoker, FoodA, FoodB = row
@@ -73,9 +89,6 @@ if __name__ == "__main__":
         send_message("localhost","temp1",message1)
         send_message("localhost","temp2",message2)
         send_message("localhost","temp3",message3)
-        # tell the user the message was sent
-        print(f" [x] Sent {message1}")
-        print(f" [x] Sent {message2}")
-        print(f" [x] Sent {message3}")
+
         # sleep for 30 seconds
-        time.sleep(30)
+        time.sleep(1)

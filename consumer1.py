@@ -1,35 +1,63 @@
 """
     This program listens for work messages contiously.
+    It also alerts user if smoker temperature decreases by 15 degrees or more in 2.5 minutes.
  
 
     Author: Deanna Clayton
-    Date: February 13, 2023
+    Date: February 20, 2023
 
 """
 
 import pika
 import sys
 import csv
-import re
+from collections import deque
+
+# create deque
+# limit to 5 items (the 5 most recent readings)
+smoker_deque = deque(maxlen=5)
 
 # open a file to write some data
 # create a csv writer for our comma delimited data
-output_file = open("smoker.csv", "w")
+output_file = open("smoker.csv", "w+")
 writer = csv.writer(output_file, delimiter = ",")
+
+# define an alert function to tell us when the smoker decreases 15 degrees or more in 2.5 min
+def smoker_alert(d, message):
+    d.append(message)
+    if len(d) == 5:
+        if d[0] - d[-1] >= 15:
+            print("Smoker Alert!")
+
+# define a float number function to see if a string can be converted to a float
+def float_num (element):
+    if element is None: 
+        return element
+    try:
+        float(element)
+        return float(element)
+    except ValueError:
+        return element
 
 # define a callback function to be called when a message is received
 def smoker_callback(ch, method, properties, body):
     """ Define behavior on getting a message."""
+    # decode the binary message body to a string and single out temperature recording.
     message = body.decode()
     message2 = str(message)[1:-1]
     message3 = message2.split(',')
-    
-    # message2 = message.lower()
-    # decode the binary message body to a string
+    message4 = float_num(message3[1])
+
+    # tell user message has been received
     print(f" [x] Received {message}")
+    
+    # call alert function
+    if isinstance(message4, float):
+        smoker_alert(smoker_deque, message4)
+
     # write the strings to the output file
     writer.writerow(message3)
-    # writer.writerow([message, message2])
+    
     # when done with task, tell the user
     print(" [x] Done.")
     # acknowledge the message was received and processed 
