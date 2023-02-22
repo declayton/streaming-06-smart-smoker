@@ -1,5 +1,5 @@
 """
-    This program sends messages to two queues on the RabbitMQ server.
+    This program sends messages to three queues on the RabbitMQ server.
 
 
     Author: Deanna Clayton
