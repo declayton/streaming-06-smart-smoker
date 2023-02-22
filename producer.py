@@ -91,4 +91,4 @@ if __name__ == "__main__":
         send_message("localhost","temp3",message3)
 
         # sleep for 30 seconds
-        time.sleep(1)
+        time.sleep(30)
